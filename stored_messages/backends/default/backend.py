@@ -40,7 +40,7 @@ class DefaultBackend(StoredMessagesBackend):
 
     def inbox_get(self, user, msg_id):
         try:
-            return Inbox.objects.get(pk=msg_id).message
+            return Inbox.objects.get(message__pk=msg_id).message
         except Inbox.DoesNotExist:
             raise MessageDoesNotExist("Message with id %s does not exist" % msg_id)
 

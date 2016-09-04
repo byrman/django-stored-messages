@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 import json
 
 from unittest import skipUnless
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 
+from stored_messages.api import add_message_for
 from stored_messages.constants import STORED_ERROR
 
 from .base import BackendBaseTest
@@ -72,6 +74,22 @@ class TestRESTApi(BackendBaseTest):
         r = self.client.get(reverse('stored_messages:inbox-list'))
         messages = json.loads(r.content.decode('utf-8'))
         self.assertEqual(len(messages), 0)
+
+    def test_detail(self):
+        user2 = get_user_model().objects.create_user("another_user", "u@user.com", "123456")
+        users = [self.user, user2]
+        add_message_for(users, STORED_ERROR, "Oops!")
+
+        self.client.login(username='test_user', password='123456')
+        r = self.client.post(reverse('stored_messages:mark_all_read'))
+
+        self.client.login(username='another_user', password='123456')
+        r = self.client.get(reverse('stored_messages:inbox-list'))
+        messages = json.loads(r.content.decode('utf-8'))
+        self.assertEqual(len(messages), 1)
+        msg_id = messages[0]['id']
+        r = self.client.get(reverse('stored_messages:inbox-detail', args=(msg_id,)))
+        self.assertEqual(r.status_code, 200)
 
 
 @skipUnless(rest_framework_installed, "Django restframework is not installed")
