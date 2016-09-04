@@ -1,6 +1,3 @@
-from .settings import stored_messages_settings
-
-
 __all__ = (
     'add_message_for',
     'broadcast_message',
@@ -21,6 +18,7 @@ def add_message_for(users, level, message_text, extra_tags='', date=None, url=No
     :param url: an optional url
     :param fail_silently: not used at the moment
     """
+    from .settings import stored_messages_settings
     BackendClass = stored_messages_settings.STORAGE_BACKEND
     backend = BackendClass()
     m = backend.create_message(level, message_text, extra_tags, date, url)
@@ -53,6 +51,7 @@ def mark_read(user, message):
     :param user: user instance for the recipient
     :param message: a Message instance to mark as read
     """
+    from .settings import stored_messages_settings
     BackendClass = stored_messages_settings.STORAGE_BACKEND
     backend = BackendClass()
     backend.inbox_delete(user, message)
@@ -64,6 +63,7 @@ def mark_all_read(user):
 
     :param user: user instance for the recipient
     """
+    from .settings import stored_messages_settings
     BackendClass = stored_messages_settings.STORAGE_BACKEND
     backend = BackendClass()
     backend.inbox_purge(user)
